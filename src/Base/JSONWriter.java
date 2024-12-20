@@ -9,6 +9,7 @@ import java.time.LocalTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 public class JSONWriter{
     
@@ -43,31 +44,48 @@ public class JSONWriter{
         }
         if(obj == null){
             isNull = true;
-            sB.append("null");
+            sB.append("");
             return sB.toString();
         }
         dTyp = obj.getClass();
-        if(dTyp.isArray()){
-            isArr = true;
+        if(dTyp.isArray() || obj instanceof List){
+            if(dTyp.isArray())
+                isArr = true;
+            else
+                isArr = false;
 //            System.err.println("JSONWriter . produceText //Bu değişken bir dizi");
             sB.append("[");
             try{
-                dTyp = Array.get(obj, 0).getClass();
-                len = Array.getLength(obj);
+                if(isArr){
+                    dTyp = Array.get(obj, 0).getClass();
+                    len = Array.getLength(obj);
+                }
+                else{// List ise..;
+                    dTyp = ((List) obj).get(0).getClass();
+                    len = ((List) obj).size();
+                }
             }
-            catch(ArrayIndexOutOfBoundsException | NullPointerException exc){
-                System.err.println("Gönderilen dizide eleman yok");
+            catch(IndexOutOfBoundsException | NullPointerException exc){
+                System.err.println("Gönderilen dizide (veyâ listede) eleman yok");
                 sB.append("]");
                 return sB.toString();
             }
+            int takedCounter = 0;
             for(int sayac = 0; sayac < len; sayac++){
-                Object valInArr = Array.get(obj, sayac);
-                sB.append(produceText(null, valInArr, putNewLineForLook, false));
-                if(sayac < len - 1){
+                Object valInArr = null;
+                if(isArr)
+                    valInArr = Array.get(obj, sayac);
+                else
+                    valInArr = ((List) obj).get(sayac);
+                if(valInArr == null)
+                    continue;
+                if(takedCounter != 0){
                     sB.append(",");
-                if(putNewLineForLook)
-                    sB.append(" ");// Burada, sonraki değer nesne ise yeni satır olması gerekebilir
+                    if(putNewLineForLook)
+                        sB.append(" ");// Burada, sonraki değer nesne ise yeni satır olması gerekebilir
                 }
+                sB.append(produceText(null, valInArr, putNewLineForLook, false));
+                takedCounter++;
             }
             sB.append("]");
             return sB.toString();
@@ -103,6 +121,8 @@ public class JSONWriter{
                 sB.append("\"");
             return sB.toString();
         }
+        else if(obj instanceof Map)
+            return produceTextFromMap((Map)obj, putNewLineForLook, key);
         else{// Değişken bir nesne ise;
             sB.append("{");
             // Değerler alınmalı:
@@ -161,29 +181,36 @@ public class JSONWriter{
         }
     }
     public String produceText(String key, Object obj){
-        return produceText(key, obj, true, false);
+        return produceText(key, obj, false, false);
     }
-    public String produceTextFromMap(Map<String, Object> map, boolean putNewLineForSeeming, String nameOfVariableOnTheMap){
+    public<T, V> String produceTextFromMap(Map<T, V> map, boolean putNewLineForSeeming, String nameOfVariableOnTheMap){
         int sayac = -1;
         boolean isFirst = true;
         StringBuilder buiText = new StringBuilder();
         if(nameOfVariableOnTheMap != null)
-            buiText.append(nameOfVariableOnTheMap).append(":");
+            buiText.append("\"").append(nameOfVariableOnTheMap).append("\"").append(":");
         if(putNewLineForSeeming)
             buiText.append("\n");
         buiText.append("{");
-        for(String key : map.keySet()){
+        for(Object key : map.keySet()){
+            String keyAsStr = String.valueOf(key);
             String value = "";
             sayac++;
             if(sayac == 1)
                 isFirst = false;
             if(map.get(key).getClass() == HashMap.class)
-                value = produceTextFromMap((HashMap<String, Object>) map.get(key), putNewLineForSeeming, key);
+                value = produceTextFromMap((HashMap<Object, Object>) map.get(key), putNewLineForSeeming, keyAsStr);
             else
-                value = produceText(key, map.get(key), putNewLineForSeeming, isFirst);
-            buiText.append(value).append(",").append("\n");
+                value = produceText(keyAsStr, map.get(key), putNewLineForSeeming, isFirst);
+            buiText.append(value).append(",");
+            if(putNewLineForSeeming)
+                buiText.append("\n");
         }
-        buiText.deleteCharAt(buiText.length() - 2);
+        short delCounter = 2;
+        if(!putNewLineForSeeming)
+            delCounter--;
+        
+        buiText.deleteCharAt(buiText.length() - delCounter);
         if(putNewLineForSeeming)
             buiText.append("\n");
         buiText.append("}");
