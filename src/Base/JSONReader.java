@@ -6,6 +6,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 
+/**
+ * 
+ * @author Mehmet Âkif SOLAK
+ * JSON okuma işlemlerini yapmak için bir sınıf
+ * @version 2.0.0
+ */
 public class JSONReader{
     enum dType{
       NUM,
@@ -34,6 +40,13 @@ public class JSONReader{
     }
 
 //İŞLEM YÖNTEMLERİ:
+    /**
+     * JSON dizisi metni okunur, nesnelere aktarılır
+     * Temel veri tiplerini doğrudan destekler
+     * JSON nesnesini {@code Map} tipinde döndürür
+     * @param text JSON metni
+     * @return Okunan dizi ({@code ArrayList} olarak) veyâ {@code null}
+     */
     public ArrayList<Object> readJSONArray(String text){
         if(text == null)
             return null;
@@ -329,9 +342,14 @@ public class JSONReader{
                     break;
             }
         }
-//        System.out.println("data.uzunluk : " + data.size());
         return arr;
     }
+    /**
+     * Nesne tipindeki JSON metni okunur, Java nesnelerine aktarılır
+     * JSON dizisi {@code List} tipinde, JSON nesnesi {@Map} tipinde döndürülür
+     * @param text JSON metni
+     * @return Okunan JSON metnindeki değişkenler veyâ {@code null}
+     */
     public HashMap<String, Object> readJSONObj(String text){
         int sayac = -1;//imlecin konumu
         int uz = text.length();//uzunluk, metnin uzunluğu
@@ -739,34 +757,26 @@ public class JSONReader{
             
         return obj;
     }
-    public String meanEscapeCharacters(String text){
-        char[] tx = text.toCharArray();
-        StringBuilder value = new StringBuilder();//Dönüş için değişken
-        boolean pass = false;//Test taksim işâreti tespit edildikten sonraki harfi atlamak için kullanılan bir bit
-        int sayac = -1;//Metin içerisinde ilerlerken kullanılan bir sayaç
-        for(char c : tx){
-            sayac++;
-            if(pass){
-                pass = false;
-                continue;
-            }
-            if(c == '\\'){
-                if(tx[sayac + 1] == 'n'){
-                    value.append('\n');
-                    pass = true;
-                    continue;
-                }
-                else if(tx[sayac + 1] == 't'){
-                    value.append('\t');
-                    pass = true;
-                    continue;
-                }
-            }
-            value.append(c);
-        }
-        return value.toString();
+    /**
+     * Verilen JSON metninin kök değişkeninin nesne olup, olmadığını döndürür
+     * Eğer JSON metni {@code "{"} ile başlıyorsa {@code true} döndürülür.
+     * @param text JSON metni
+     * @return Kök değişken nesne ise {@code true}, diğer durumda {@code false}
+     */
+    public boolean isRootAnObject(String text){
+        return detectTypeOfRootVariable(text, true);
     }
-    public HashMap<String, Object> getValueAndEmptyCycleTimeIfIsNonFunctionalEscape(char c){// Kaçış simgesinden sonra gelen karakteri alır ve gerekli bilgileri döndürür:
+    /**
+     * Verilen JSON metninin kök değişkeninin nesne olup, olmadığını döndürür
+     * Eğer JSON metni {@code "{"} ile başlıyorsa {@code true} döndürülür.
+     * @param text JSON metni
+     * @return Kök değişken nesne ise {@code true}, diğer durumda {@code false}
+     */
+    public boolean isRootAnArray(String text){
+        return detectTypeOfRootVariable(text, false);
+    }
+    // ARKAPLAN İŞLEM YÖNTEMLERİ:
+    private HashMap<String, Object> getValueAndEmptyCycleTimeIfIsNonFunctionalEscape(char c){// Kaçış simgesinden sonra gelen karakteri alır ve gerekli bilgileri döndürür:
         /*
             NOT : Fonksiyonellik ifâde eden '\b' kaçış karakteri bu fonksiyonda ele alınmıyor!
             Sonraki karakterlerin okunmasını gerektiren 'u' için değer yerleştirme yapılmıyor; sadece tespit ve boşa dönme sayısı çalıştırılıyor
@@ -802,7 +812,7 @@ public class JSONReader{
             }
             case 'f' :{
                 isEsc = true;
-                cycle = 0;// Şimdilik hatâ vermemesi eklendi, değiştirilmesi lazım
+                cycle = 0;// Şimdilik hatâ vermemesi için eklendi, değiştirilmesi lazım
                 //.;.
                 break;
             }
@@ -836,45 +846,6 @@ public class JSONReader{
         results.put("result", isEsc);
         return results;
     }
-    public String explicationEscapeCharacters(String text){
-        StringBuilder buiText = new StringBuilder();
-        char[] tx = text.toCharArray();
-        boolean isEsc = false;// isEscape, kaçış karakteri tespit edildiyse 'true' olmalıdır.
-        int sayac = -1;
-        for(char c : tx){
-            sayac++;
-            if(isEsc){
-                isEsc = false;
-                continue;
-            }
-            if(c == '\\'){
-                if(sayac != tx.length - 1){// Sondan bir önceki harfte değilsek
-                    switch(tx[sayac + 1]){// Sonraki harfin kaçış karakteri olup, olmadığını sorgula
-                        case 'n' :{
-                            buiText.append("\n");
-                            isEsc = true;
-                            break;
-                        }
-                        case 't' :{
-                            buiText.append("\t");
-                            isEsc = true;
-                            break;
-                        }
-                        case '\\' :{
-                            buiText.append("\\");
-                            isEsc = true;
-                            break;
-                        }
-                    }
-                }
-            }
-            if(!isEsc)
-                buiText.append(c);
-        }
-        return buiText.toString();
-    }
-
-//ARKAPLAN İŞLEM YÖNTEMLERİ:
     private boolean isNumber(char c){
         switch(c){
             case '0' :{
@@ -963,16 +934,16 @@ public class JSONReader{
                 return true;
         return false;
     }
-    public int splitOnOutsideOfQuotes(String text, char searched, char startCharOfDeep, char endCharOfDeep){
+    private int splitOnOutsideOfQuotes(String text, char searched, char startCharOfDeep, char endCharOfDeep){
         return splitOnOutsideOfQutes(text, searched, startCharOfDeep, endCharOfDeep, false, true);
     }
-    public int findCorneredBracket(String text){
+    private int findCorneredBracket(String text){
         return splitOnOutsideOfQuotes(text, ']', '[', ']');// Aranan karakterin mevkîsini döndürüyor
     }
-    public int findCurveBracket(String text){
+    private int findCurveBracket(String text){
         return splitOnOutsideOfQuotes(text, '}', '{', '}');
     }
-    public int splitOnOutsideOfQutes(String text, char searched, char startCharOfDeep, char endCharOfDeep, boolean startDeepAs1, boolean isEscapeCharacterValid){
+    private int splitOnOutsideOfQutes(String text, char searched, char startCharOfDeep, char endCharOfDeep, boolean startDeepAs1, boolean isEscapeCharacterValid){
         // Bu fonksiyon tırnak işâretini aramak için kullanılamaz!
         ArrayList<String> list = new ArrayList<String>();
         int deep = 0;// Derinliği gösteren değişken
@@ -1042,8 +1013,23 @@ public class JSONReader{
     private String getUnicodeCharacter(String fourHexValue){// Eğer ki gelen ifâde geçerli bir unicode kodu değilse, sayı olmayan ilk kısmı döndür
         return UnicodeHelper.getCharacterFromUnicodeAfterU(fourHexValue);
     }
+    private boolean detectTypeOfRootVariable(String text, boolean lookForRootIsObject){
+        text = text.trim();
+        char[] tx = text.toCharArray();
+        char startTarget = (lookForRootIsObject ? '{' : '[');
+        for(int sayac = 0; sayac < tx.length; sayac++){
+            if(tx[sayac] == '\n' || tx[sayac] == '\t' || tx[sayac] == '\r')
+                continue;
+            return tx[sayac] == startTarget;
+        }
+        return false;
+    }
 
 //ERİŞİM YÖNTEMLERİ:
+    /**
+     * JSON okuma hizmetini kullanmak için {@code JSONReader} döndürülür
+     * @return {@code JSONReader}
+     */
     public static JSONReader getService(){
         if(service == null){
             service = new JSONReader();

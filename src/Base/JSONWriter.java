@@ -10,21 +10,30 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
-
+/**
+ * Bir Java nesnesinin JSON metnini oluşturmak için kullanılan hizmet sınıfıdır
+ * @author Mehmed Âkif SOLAK
+ */
 public class JSONWriter{
-    
 
-    public JSONWriter(){
-        
-    }
+    public JSONWriter(){}
 
 //İŞLEM YÖNTEMLERİ:
+    /**
+     * Verilen nesnenin karşılığı olan JSON metni üretilir, Allâh'ın izniyle..
+     * Bu JSON nesnesi kök nesne olacaksa 'key' parametresine {@code} null verin
+     * @param key JSON nesnesi başka JSON nesnesinin özelliği ise ismini girin
+     * @param obj JSON metnine çevrilmek istenen nesne
+     * @param isFirst Nesnenin ilk elemanı yazdırılıyorsa {@code true} olmalı
+     * @return JSON metni veyâ boş metîn
+     */
     public String produceText(String key, Object obj, boolean putNewLineForLook, boolean isFirst){
         // isFirst : Gönderilen değişken ilk eleman ise 'true' olmalı
         boolean isNum = false;// Yazısı üretilmek istenen değişken bir sayı ise 'true' olmalıdır
         boolean isStr = false;// Değişken tipi yazı ise 'true' olmalı
         boolean isBool = false;// Değişken tipi 'boolean' ise 'true' olmalı
         boolean isArr = false;// Değişken tipi dizi ise 'true' olmalı
+        boolean isJSONArr = false;// Değişken tipi JSONArray ise 'true' olmalı
         boolean isByte = false;// Değişken tipi byte ise 'true' olmalı
         boolean isPri = false;// Temel bir veri tipi ise 'true' olmalı
         boolean isAllSame = false;// Eğer değişken bir dizi ise ve dizi içerisindeki tüm değerlerin tipi aynı ise 'true' olmalı
@@ -35,7 +44,7 @@ public class JSONWriter{
         if(putNewLineForLook && isFirst)
             sB.append("\n");
         if(key != null){
-            sB.append("\"" + key + "\"");
+            sB.append("\"").append(key).append("\"");
             if(putNewLineForLook)
                 sB.append(" ");
             sB.append(":");
@@ -44,25 +53,44 @@ public class JSONWriter{
         }
         if(obj == null){
             isNull = true;
-            sB.append("");
+            sB.append("NULL");
             return sB.toString();
         }
         dTyp = obj.getClass();
-        if(dTyp.isArray() || obj instanceof List){
+        if(dTyp.isEnum()){
+            obj = String.valueOf(obj);
+            dTyp = String.class;
+        }
+        if(obj instanceof JSONObject)
+            return produceJSONTextFromMap(((JSONObject) obj).getData(), putNewLineForLook, key);
+        if(dTyp.isArray() || obj instanceof List || obj instanceof JSONArray){
             if(dTyp.isArray())
                 isArr = true;
-            else
+            else{
                 isArr = false;
+                if(obj instanceof JSONArray)
+                    isJSONArr = true;
+            }
 //            System.err.println("JSONWriter . produceText //Bu değişken bir dizi");
             sB.append("[");
             try{
+                Object firstElement = null;
                 if(isArr){
-                    dTyp = Array.get(obj, 0).getClass();
+                    firstElement = Array.get(obj, 0);
                     len = Array.getLength(obj);
                 }
                 else{// List ise..;
-                    dTyp = ((List) obj).get(0).getClass();
-                    len = ((List) obj).size();
+                    if(isJSONArr){
+                        firstElement = ((JSONArray) obj).getAsObject(0);
+                        len = ((JSONArray) obj).getSize();
+                    }
+                    else{
+                        firstElement = ((List) obj).get(0);
+                        len = ((List) obj).size();
+                    }
+                }
+                if(firstElement != null){
+                    dTyp = firstElement.getClass();
                 }
             }
             catch(IndexOutOfBoundsException | NullPointerException exc){
@@ -75,10 +103,12 @@ public class JSONWriter{
                 Object valInArr = null;
                 if(isArr)
                     valInArr = Array.get(obj, sayac);
+                else if(isJSONArr)
+                    valInArr = ((JSONArray) obj).getAsObject(sayac);
                 else
                     valInArr = ((List) obj).get(sayac);
-                if(valInArr == null)
-                    continue;
+//                if(valInArr == null)//Dizi içerisindeki NULL değerleri okuyabilmek için kapatıldı
+//                    continue;
                 if(takedCounter != 0){
                     sB.append(",");
                     if(putNewLineForLook)
@@ -122,7 +152,7 @@ public class JSONWriter{
             return sB.toString();
         }
         else if(obj instanceof Map)
-            return produceTextFromMap((Map)obj, putNewLineForLook, key);
+            return produceJSONTextFromMap((Map)obj, putNewLineForLook, key);
         else{// Değişken bir nesne ise;
             sB.append("{");
             // Değerler alınmalı:
@@ -180,10 +210,24 @@ public class JSONWriter{
             return sB.toString();
         }
     }
+    /**
+     * Verilen nesnenin karşılığı olan JSON metni üretilir
+     * Bu JSON nesnesi kök nesne olacaksa 'key' parametresine {@code} null verin
+     * @param key JSON nesnesi başka JSON nesnesinin özelliği ise ismini girin
+     * @param obj JSON metnine çevrilmek istenen nesne
+     * @return JSON metni veyâ boş metîn
+     */
     public String produceText(String key, Object obj){
         return produceText(key, obj, false, false);
     }
-    public<T, V> String produceTextFromMap(Map<T, V> map, boolean putNewLineForSeeming, String nameOfVariableOnTheMap){
+    /**
+     * Özellikleri {@code Map} ile tutulan JSON nesnesinin metni üretilir
+     * Bu, kök nesne ise 'nameVariableOnTheMap' parametresine {@code} null verin
+     * @param map Özellik haritası
+     * @param nameOfVariableOnTheMap başka JSON nesnesinin özelliği ise ismi
+     * @return JSON metni veyâ boş metîn
+     */
+    public <T, V> String produceJSONTextFromMap(Map<T, V> map, boolean putNewLineForSeeming, String nameOfVariableOnTheMap){
         int sayac = -1;
         boolean isFirst = true;
         StringBuilder buiText = new StringBuilder();
@@ -198,10 +242,22 @@ public class JSONWriter{
             sayac++;
             if(sayac == 1)
                 isFirst = false;
-            if(map.get(key).getClass() == HashMap.class)
-                value = produceTextFromMap((HashMap<Object, Object>) map.get(key), putNewLineForSeeming, keyAsStr);
-            else
+            boolean produceSimply = true;// NULL değerlerin eklenmesi için yapılan düzenleme
+            if(map.get(key) != null){
+                if(map.get(key) instanceof Map || map.get(key) instanceof JSONObject){
+                    Object objToSend = null;
+                    if(map.get(key) instanceof JSONObject)
+                        objToSend = ((JSONObject) map.get(key)).getData();
+                    else
+                        objToSend = map.get(key);
+                    value = produceJSONTextFromMap((HashMap<Object, Object>) objToSend, putNewLineForSeeming, keyAsStr);
+                    produceSimply = false;
+                }
+            }
+            if(produceSimply){
                 value = produceText(keyAsStr, map.get(key), putNewLineForSeeming, isFirst);
+            }
+            
             buiText.append(value).append(",");
             if(putNewLineForSeeming)
                 buiText.append("\n");
@@ -217,7 +273,7 @@ public class JSONWriter{
         return buiText.toString();
     }
     //ARKAPLAN İŞLEM YÖNTEMLERİ:
-    private boolean isBasicDataType(Object val){
+    private static boolean isBasicDataType(Object val){
         Class dTyp = val.getClass();
         if(dTyp == Integer.class || dTyp == Double.class || dTyp == Float.class ||
                 dTyp == Long.class || dTyp == Short.class || dTyp == String.class ||
@@ -225,7 +281,4 @@ public class JSONWriter{
             return true;
         return false;
     }
-
-//ERİŞİM YÖNTEMLERİ:
-    
 }
