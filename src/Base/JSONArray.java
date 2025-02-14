@@ -168,10 +168,17 @@ public class JSONArray implements Iterable<Object>, Cloneable{
 
 // ERİŞİM YÖNTEMLERİ:
     /**
+     * {@code JSONArray} verisini döndürür
+     * @return {@code List} biçimindeki {@code JSONArray} verisi
+     */
+    protected List getData(){
+        return this.data;
+    }
+    /**
      * Bu JSON dizisinin karşılığı olan JSON metni üretilir - döndürülür
      * @return JSON metni
      */
-    public String getJSONText(){
+    public String getJSONText() {
         if(!isUpdate)
             produceJSONText();
         return jsonText.toString();

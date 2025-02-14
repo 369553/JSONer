@@ -5,12 +5,14 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 
  * @author Mehmet Âkif SOLAK
  * JSON okuma işlemlerini yapmak için bir sınıf
- * @version 2.0.0
+ * @version 2.0.1
  */
 public class JSONReader{
     enum dType{
@@ -21,11 +23,11 @@ public class JSONReader{
       BOOL,
       NULL
     };
-    Locale loc = Locale.getDefault();
+    private Locale loc = Locale.getDefault();
     private static JSONReader service;
-    HashMap<Character, dType> sCtType;//start Character to Type, başlangıç karakterine göre değişkenin tipi
-    HashMap<dType, Character> typeTE;//Type to End, değişkenin tipine göre kabûl edilen bitiş karakteri
-    char[] starts;//Kabûl edilen başlangıç karakterleri
+    private HashMap<Character, dType> sCtType;//start Character to Type, başlangıç karakterine göre değişkenin tipi
+    private HashMap<dType, Character> typeTE;//Type to End, değişkenin tipine göre kabûl edilen bitiş karakteri
+    private char[] starts;//Kabûl edilen başlangıç karakterleri
 
     public JSONReader(){
         sCtType = new HashMap<Character, dType>();
@@ -147,7 +149,7 @@ public class JSONReader{
                 else if(c == '{'){
                     type = dType.OBJ;// Veri tipini 'nesne' olarak işâretle
                     String sub = text.substring(sayac, sayac + findCurveBracket(text.substring(sayac)) + 1);// Aranan karakter son karakter olduğundan ve 'subString' yöntemi üst sınırdaki son değeri almadığından bir değer büyüğünü yazıyoruz
-                    Object subVal = readJSONObj(sub);
+                    Object subVal = readJSONObject(sub);
                     ctFIdle = sub.length() - 1;
                     isPC = true;
                     isStarted = false;
@@ -350,7 +352,7 @@ public class JSONReader{
      * @param text JSON metni
      * @return Okunan JSON metnindeki değişkenler veyâ {@code null}
      */
-    public HashMap<String, Object> readJSONObj(String text){
+    public HashMap<String, Object> readJSONObject(String text){
         int sayac = -1;//imlecin konumu
         int uz = text.length();//uzunluk, metnin uzunluğu
         int lengthOfArrOrObjValDet = 0;//Değişkenin değeri dizi ise veyâ nesne ise bu dizi veyâ nesne değer olarak alındıktan sonra döngünün nereye kadar boş döneceğini (işlem yapmadan) belirtmek için kullanılıyor bi iznillâh
@@ -651,7 +653,7 @@ public class JSONReader{
 //                    System.out.println("parametre:\n" + text.substring(sayac));
                     String subText = text.substring(sayac, sayac + findCurveBracket(text.substring(sayac)) + 1);// Aranan karakter son karakter olduğundan ve 'subString' yöntemi üst sınırdaki son değeri almadığından bir değer büyüğünü yazıyoruz
 //                    System.out.println("subText : " + subText);
-                    Object subVal = readJSONObj(subText);
+                    Object subVal = readJSONObject(subText);
                     subObjDet = true;
                     lengthOfArrOrObjValDet = subText.length() - 1;
                     iSPC = true;
@@ -756,6 +758,24 @@ public class JSONReader{
         }
             
         return obj;
+    }
+    /**
+     * Okunan JSON nesnesini simgeleyen {@code JSONObject} nesnesi döndürülür
+     * @param text JSON metni
+     * @return JSON nesnesini simgeleyen {@code JSONObject} veyâ {@code null}
+     */
+    public JSONObject readJSONObjectReturnJSONObject(String text){
+        Map read = readJSONObject(text);
+        return (read != null ? new JSONObject(read) : null);
+    }
+    /**
+     * Okunan JSON dizisini simgeleyen {@code JSONArray} nesnesi döndürülür
+     * @param text JSON metni
+     * @return JSON dizisini simgeleyen {@code JSONArray} veyâ {@code null}
+     */
+    public JSONArray readJSONArrayReturnJSONArray(String text){
+        List read = readJSONArray(text);
+        return (read != null ? new JSONArray(read) : null);
     }
     /**
      * Verilen JSON metninin kök değişkeninin nesne olup, olmadığını döndürür
