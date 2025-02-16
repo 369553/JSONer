@@ -1,4 +1,4 @@
-package Base;
+package jsoner;
 
 import ReflectorRuntime.Reflector;
 import java.util.ArrayList;
@@ -11,7 +11,7 @@ import java.util.Map;
  * @author Mehmed Âkif SOLAK
  */
 public class JSONArray implements Iterable<Object>, Cloneable{
-    private List data = new ArrayList<Object>();
+    private List<Object> data = new ArrayList<Object>();
     private StringBuilder jsonText = new StringBuilder();
     private boolean isUpdate = false;
     private static JSONWriter jsonWriter = new JSONWriter();
@@ -171,7 +171,7 @@ public class JSONArray implements Iterable<Object>, Cloneable{
      * {@code JSONArray} verisini döndürür
      * @return {@code List} biçimindeki {@code JSONArray} verisi
      */
-    protected List getData(){
+    protected List<Object> getData(){
         return this.data;
     }
     /**
