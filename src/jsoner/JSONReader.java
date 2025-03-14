@@ -12,7 +12,7 @@ import java.util.Map;
  * 
  * @author Mehmet Âkif SOLAK
  * JSON okuma işlemlerini yapmak için bir sınıf
- * @version 2.0.1
+ * @version 2.0.2
  */
 public class JSONReader{
     enum dType{
@@ -348,7 +348,7 @@ public class JSONReader{
     }
     /**
      * Nesne tipindeki JSON metni okunur, Java nesnelerine aktarılır
-     * JSON dizisi {@code List} tipinde, JSON nesnesi {@Map} tipinde döndürülür
+     * JSON dizisi {@code List} tipinde, JSON nesnesi {@code Map} tipinde döndürülür
      * @param text JSON metni
      * @return Okunan JSON metnindeki değişkenler veyâ {@code null}
      */
@@ -779,7 +779,7 @@ public class JSONReader{
     }
     /**
      * Verilen JSON metninin kök değişkeninin nesne olup, olmadığını döndürür
-     * Eğer JSON metni {@code "{"} ile başlıyorsa {@code true} döndürülür.
+     * Eğer JSON metni {@code '{'} ile başlıyorsa {@code true} döndürülür.
      * @param text JSON metni
      * @return Kök değişken nesne ise {@code true}, diğer durumda {@code false}
      */
@@ -788,7 +788,7 @@ public class JSONReader{
     }
     /**
      * Verilen JSON metninin kök değişkeninin nesne olup, olmadığını döndürür
-     * Eğer JSON metni {@code "{"} ile başlıyorsa {@code true} döndürülür.
+     * Eğer JSON metni {@code '{'} ile başlıyorsa {@code true} döndürülür.
      * @param text JSON metni
      * @return Kök değişken nesne ise {@code true}, diğer durumda {@code false}
      */

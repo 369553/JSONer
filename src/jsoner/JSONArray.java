@@ -22,16 +22,18 @@ public class JSONArray implements Iterable<Object>, Cloneable{
      * Referans tabanlı çalışır
      * @param data JSON dizisini temsîl eden veri
      */
-    public JSONArray(List data){
+    public JSONArray(List<? extends Object> data){
         if(data == null)
             throw new IllegalArgumentException("Girilen veri listesi NULL");
-        this.data = data;
+        for(Object element : data){
+            this.data.add(element);
+        }
     }
 
 // İŞLEM YÖNTEMLERİ:
     /**
      * JSONArray referans tabanlı olduğu için yeni bir nesne döndüren
-     * {@clone} yöntemini destekliyor
+     * {@code clone} yöntemini destekliyor
      * Yeni bir liste oluşturulur; nesneler doğrudan eklenir;
      * Yanî "Shallow copy" modunda kopyalama yapılır
      * @return Yeni {@code JSONArray} nesnesi
@@ -200,7 +202,7 @@ public class JSONArray implements Iterable<Object>, Cloneable{
     /**
      * Verilen indisteki {@code boolean} verisi döndürülür
      * @param index İndis (sıra numarası); sıfırdan başlar
-     * @return Verilen sıradaki {@boolean} verisi veyâ {@code null}
+     * @return Verilen sıradaki {@code boolean} verisi veyâ {@code null}
      */
     public boolean getBoolean(int index){
         return getObject(Boolean.class, index);
@@ -208,7 +210,7 @@ public class JSONArray implements Iterable<Object>, Cloneable{
     /**
      * Verilen indisteki tamsayı verisi döndürülür
      * @param index İndis (sıra numarası); sıfırdan başlar
-     * @return Verilen sıradaki {@int} verisi veyâ {@code null}
+     * @return Verilen sıradaki {@code int} verisi veyâ {@code null}
      */
     public int getInt(int index){
         return getObject(Integer.class, index);
@@ -216,7 +218,7 @@ public class JSONArray implements Iterable<Object>, Cloneable{
     /**
      * Verilen indisteki {@code double} verisi döndürülür
      * @param index İndis (sıra numarası); sıfırdan başlar
-     * @return Verilen sıradaki {@double} verisi veyâ {@code null}
+     * @return Verilen sıradaki {@code double} verisi veyâ {@code null}
      */
     public double getDouble(int index){
         return getObject(Double.class, index);
@@ -224,7 +226,7 @@ public class JSONArray implements Iterable<Object>, Cloneable{
     /**
      * Verilen indisteki {@code float} verisi döndürülür
      * @param index İndis (sıra numarası); sıfırdan başlar
-     * @return Verilen sıradaki {@float} verisi veyâ {@code null}
+     * @return Verilen sıradaki {@code float} verisi veyâ {@code null}
      */
     public float getFloat(int index){
         return getObject(Float.class, index);
@@ -232,7 +234,7 @@ public class JSONArray implements Iterable<Object>, Cloneable{
     /**
      * Verilen indisteki {@code long} verisi döndürülür
      * @param index İndis (sıra numarası); sıfırdan başlar
-     * @return Verilen sıradaki {@long} verisi veyâ {@code null}
+     * @return Verilen sıradaki {@code long} verisi veyâ {@code null}
      */
     public long getLong(int index){
         return getObject(Long.class, index);
@@ -240,7 +242,7 @@ public class JSONArray implements Iterable<Object>, Cloneable{
     /**
      * Verilen indisteki {@code short} verisi döndürülür
      * @param index İndis (sıra numarası); sıfırdan başlar
-     * @return Verilen sıradaki {@short} verisi veyâ {@code null}
+     * @return Verilen sıradaki {@code short} verisi veyâ {@code null}
      */
     public short getShort(int index){
         return getObject(Short.class, index);
@@ -248,7 +250,7 @@ public class JSONArray implements Iterable<Object>, Cloneable{
     /**
      * Verilen indisteki {@code char} verisi döndürülür
      * @param index İndis (sıra numarası); sıfırdan başlar
-     * @return Verilen sıradaki {@char} verisi veyâ {@code null}
+     * @return Verilen sıradaki {@code char} verisi veyâ {@code null}
      */
     public char getChar(int index){
         return getObject(Character.class, index);
@@ -264,7 +266,7 @@ public class JSONArray implements Iterable<Object>, Cloneable{
     /**
      * Verilen indisteki {@code JSONObject} verisi döndürülür
      * @param index İndis (sıra numarası); sıfırdan başlar
-     * @return Verilen sıradaki {@JSONObject} verisi veyâ {@code null}
+     * @return Verilen sıradaki {@code JSONObject} verisi veyâ {@code null}
      * @throws IllegalArgumentException Verinin {@code Map} olması durumunda,
      * verideki anahtarlar {@code String} tipinde değilse, bu hatâ fırlatılır
      */
@@ -286,7 +288,7 @@ public class JSONArray implements Iterable<Object>, Cloneable{
     /**
      * Verilen indisteki {@code JSONArray} verisi döndürülür
      * @param index İndis (sıra numarası); sıfırdan başlar
-     * @return Verilen sıradaki {@JSONArray} verisi veyâ {@code null}
+     * @return Verilen sıradaki {@code JSONArray} verisi veyâ {@code null}
      */
     public JSONArray getJSONArray(int index){
         Object val = data.get(index);

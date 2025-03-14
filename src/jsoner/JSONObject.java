@@ -22,10 +22,12 @@ public class JSONObject implements Cloneable{
      * tipinde verebilirsiniz
      * @param data {@code JSONObject} nesnesi verileri
      */
-    public JSONObject(Map<String, Object> data){
+    public JSONObject(Map<String, ? extends Object> data){
         if(data == null)
             throw new IllegalArgumentException("Girilen veri haritası NULL");
-        this.data = data;
+        for(String key : data.keySet()){
+            this.data.put(key, data.get(key));
+        }
     }
 
 //İŞLEM YÖNTEMLERİ:
