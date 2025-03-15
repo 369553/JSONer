@@ -53,7 +53,7 @@ public class JSONWriter{
         }
         if(obj == null){
             isNull = true;
-            sB.append("NULL");
+            sB.append("null");
             return sB.toString();
         }
         dTyp = obj.getClass();
@@ -94,7 +94,7 @@ public class JSONWriter{
                 }
             }
             catch(IndexOutOfBoundsException | NullPointerException exc){
-                System.err.println("Gönderilen dizide (veyâ listede) eleman yok");
+//                System.err.println("Gönderilen dizide (veyâ listede) eleman yok");
                 sB.append("]");
                 return sB.toString();
             }
@@ -236,7 +236,9 @@ public class JSONWriter{
         if(putNewLineForSeeming)
             buiText.append("\n");
         buiText.append("{");
+        boolean deleteLastCharacter = false;
         for(Object key : map.keySet()){
+            deleteLastCharacter = true;
             String keyAsStr = String.valueOf(key);
             String value = "";
             sayac++;
@@ -265,8 +267,8 @@ public class JSONWriter{
         short delCounter = 2;
         if(!putNewLineForSeeming)
             delCounter--;
-        
-        buiText.deleteCharAt(buiText.length() - delCounter);
+        if(deleteLastCharacter)
+            buiText.deleteCharAt(buiText.length() - delCounter);
         if(putNewLineForSeeming)
             buiText.append("\n");
         buiText.append("}");
