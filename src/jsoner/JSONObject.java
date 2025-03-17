@@ -4,12 +4,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import ReflectorRuntime.Reflector;
+import java.util.Iterator;
+import java.util.function.Consumer;
 /**
  * JSON nesnesini temsil eden sınıftır
  * İçerisinde anahtar - değer ikilisi olarak veri barındırabilir
  * @author Mehmed Âkif SOLAK
  */
-public class JSONObject implements Cloneable{
+public class JSONObject implements Cloneable, Iterable<Map<String, Object>>{
     private Map<String, Object> data = new HashMap<String, Object>();// JSON verisindeki değişkenler
     private StringBuilder jsonText = new StringBuilder();// JSON metni
     private boolean isUpdate = false;
@@ -138,6 +140,43 @@ public class JSONObject implements Cloneable{
         this.data.remove(name);
         if(numberOfElements != this.data.size())
             this.isUpdate = false;
+    }
+    /**
+     * Verileri sırayla dolaşabilmek için yineleyici {@code Iterator} nesnesi
+     * @return {@code Iterator<Map<String, Object>>} nesnesi, her dönüş bir
+     * elemanı anahtarıyla berâber getirir
+     */
+    @Override
+    public Iterator<Map<String, Object>> iterator(){
+        Iterator<Map<String, Object>> itr = new Iterator<Map<String, Object>>(){
+            int index = -1;
+            Iterator<String> dataIterator = data.keySet().iterator();
+            Map<String, Object> current = new HashMap<String, Object>();
+            String currKey = null;
+            @Override
+            public boolean hasNext(){
+                return dataIterator.hasNext();
+            }
+            @Override
+            public Map<String, Object> next(){
+                if(currKey != null)
+                    current.remove(currKey);
+                currKey = dataIterator.next();// Mevcut indeksteki anahtar
+                current.put(currKey, data.get(currKey));
+                return current;
+            }
+            @Override
+            public void remove() throws java.lang.IllegalStateException{
+                if(currKey == null)
+                    throw new IllegalStateException("Önce next() yöntemini çalıştırmayı deneyin!");
+                data.remove(currKey);
+            }
+        };
+        return itr;
+    }
+    @Override
+    public void forEach(Consumer<? super Map<String, Object>> action){
+        Iterable.super.forEach(action);
     }
 
 //ARKAPLAN İŞLEM YÖNTEMLERİ:

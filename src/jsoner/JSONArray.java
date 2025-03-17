@@ -301,8 +301,8 @@ public class JSONArray implements Iterable<Object>, Cloneable{
         return null;
     }
     /**
-     * Verileri sırayla dolaşabilmek için liste {@code Iterator} nesnesi
-     * @return {@code Iterator} nesnesi
+     * Verileri sırayla dolaşabilmek için yineleyici {@code Iterator} nesnesi
+     * @return {@code Iterator<Object>} nesnesi
      */
     @Override
     public Iterator<Object> iterator(){
