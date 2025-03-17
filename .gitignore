@@ -1,20 +1,4 @@
-/dist/
-/libs/doc*
-/docs/
-# NetBeans specific #
-nbproject/private/
 build/
 nbbuild/
 dist/
 docs/
-nbdist/
-nbactions.xml
-nb-configuration.xml
-
-# Class Files #
-*.class
-
-# Package Files #
-*.jar
-*.war
-*.ear
