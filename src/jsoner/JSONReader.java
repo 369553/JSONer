@@ -12,7 +12,7 @@ import java.util.Map;
  * 
  * @author Mehmet Âkif SOLAK
  * JSON okuma işlemlerini yapmak için bir sınıf
- * @version 2.0.3
+ * @version 2.0.4
  */
 public class JSONReader{
     enum dType{
@@ -132,7 +132,7 @@ public class JSONReader{
                 }
                 if(c == '['){// Yeni değerin tipi dizi imiş
                     type = dType.ARR;// Veri tipini 'dizi' olarak işâretle
-                    String sub = text.substring(sayac, sayac + findCorneredBracket(text.substring(sayac) + 1));// Aranan karakter son karakter olduğundan ve 'subString' yöntemi üst sınırdaki son değeri almadığından bir değer büyüğünü yazıyoruz
+                    String sub = text.substring(sayac, sayac + findCorneredBracket(text.substring(sayac)) + 1);// Aranan karakter son karakter olduğundan ve 'subString' yöntemi üst sınırdaki son değeri almadığından bir değer büyüğünü yazıyoruz
 //                    System.out.println("subText:\n" + sub + "\n\n");
                     Object subVal = readJSONArray(sub);
                     ctFIdle = sub.length() - 1;
@@ -297,13 +297,13 @@ public class JSONReader{
                         String[] numbers = oVal.toString().split("\\.");
                         int digitNumber = numbers[0].length();
                         boolean isABigNumber = false;
-                        boolean isAFloatNumber = false;
+                        boolean isADoubleNumber = false;
                         if(digitNumber > 9)
                             isABigNumber = true;
                         if(numbers.length == 2)
-                            isAFloatNumber = true;
-                        if(isAFloatNumber){
-                            float num = Float.valueOf(oVal.toString());
+                            isADoubleNumber = true;
+                        if(isADoubleNumber){
+                            double num = Double.valueOf(oVal.toString());
                             val = num;
                         }
                         else if(isABigNumber){
@@ -698,13 +698,13 @@ public class JSONReader{
                         String[] numbers = oValue.toString().split("\\.");
                         int digitNumber = numbers[0].length();
                         boolean isABigNumber = false;
-                        boolean isAFloatNumber = false;
+                        boolean isADoubleNumber = false;
                         if(digitNumber > 9)
                             isABigNumber = true;
                         if(numbers.length == 2)
-                            isAFloatNumber = true;
-                        if(isAFloatNumber){
-                            float num = Float.valueOf(oValue.toString());
+                            isADoubleNumber = true;
+                        if(isADoubleNumber){
+                            double num = Double.valueOf(oValue.toString());
                             obj.put(name.toString(), num);
                         }
                         else if(isABigNumber){
