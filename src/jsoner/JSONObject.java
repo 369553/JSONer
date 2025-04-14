@@ -129,7 +129,7 @@ public class JSONObject implements Cloneable, Iterable<Map<String, Object>>{
             return null;
         if(this.data == null)
             return null;
-        return Reflector.getService().pruduceNewInjectedObject(targetClass, data, codeStyle);
+        return Reflector.getService().produceInjectedObject(targetClass, data, codeStyle);
     }
     /**
      * Verilen anahtarın işâret ettiği veri kaldırılır
