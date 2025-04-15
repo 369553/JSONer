@@ -6,6 +6,8 @@ import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,6 +15,7 @@ import java.util.List;
 /**
  * Bir Java nesnesinin JSON metnini oluşturmak için kullanılan hizmet sınıfıdır
  * @author Mehmed Âkif SOLAK
+ * @version 2.0.6
  */
 public class JSONWriter{
 
@@ -60,6 +63,11 @@ public class JSONWriter{
         if(dTyp.isEnum()){
             obj = String.valueOf(obj);
             dTyp = String.class;
+        }
+        if((obj instanceof Collection) && !(obj instanceof Map) && !(obj instanceof List)){// List ve Map dışındaki koleksiyonları ele almak için
+            List<Object> asList = new ArrayList<Object>();
+            asList.addAll((Collection) obj);
+            return produceText(key, asList, putNewLineForLook, isFirst);
         }
         if(obj instanceof JSONObject)
             return produceJSONTextFromMap(((JSONObject) obj).getData(), putNewLineForLook, key);
