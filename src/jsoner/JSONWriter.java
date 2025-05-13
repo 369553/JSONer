@@ -128,7 +128,6 @@ public class JSONWriter{
             sB.append("]");
             return sB.toString();
         }
-        
         // Önce dizi olmayan verilerin JSON metnini üret;
         // Sonra dizi için özyinelemeli olacak şekilde algoritma tasarla
         else if(dTyp == Integer.class || dTyp == Double.class || dTyp == Float.class || dTyp == Long.class || dTyp == Short.class || dTyp == BigInteger.class){
