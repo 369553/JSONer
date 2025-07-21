@@ -178,7 +178,10 @@ public class JSONObject implements Cloneable, Iterable<Map<String, Object>>{
     public void forEach(Consumer<? super Map<String, Object>> action){
         Iterable.super.forEach(action);
     }
-
+    @Override
+    public String toString(){
+        return this.getJSONText();
+    }
 //ARKAPLAN İŞLEM YÖNTEMLERİ:
     private void produceJSONText(){
         this.jsonText.delete(0, this.jsonText.length());
@@ -195,7 +198,7 @@ public class JSONObject implements Cloneable, Iterable<Map<String, Object>>{
             return null;
         T casted = null;
         try{
-            casted = targetClass.cast(value);
+            casted = Reflector.getService().getCastedObject(targetClass, value);
             return casted;
         }
         catch(ClassCastException exc){

@@ -141,6 +141,10 @@ public class JSONArray implements Iterable<Object>, Cloneable{
         if(numberOfElements != this.data.size())
             this.isUpdate = false;
     }
+    @Override
+    public String toString(){
+        return this.getJSONText();
+    }
     //ARKAPLAN İŞLEM YÖNTEMLERİ:
     private <T> T getObject(Class<T> targetClass, int index){
         if(index < 0 || index >= data.size())
@@ -150,7 +154,7 @@ public class JSONArray implements Iterable<Object>, Cloneable{
             return null;
         T casted = null;
         try{
-            casted = targetClass.cast(value);
+            casted = Reflector.getService().getCastedObject(targetClass, value);
             return casted;
         }
         catch(ClassCastException exc){
@@ -161,7 +165,6 @@ public class JSONArray implements Iterable<Object>, Cloneable{
     private void add(Object name){
         this.data.add(name);
     }
-    //ARKAPLAN İŞLEM YÖNTEMLERİ:
     private void produceJSONText(){
         this.jsonText.delete(0, this.jsonText.length());
         this.jsonText.append(jsonWriter.produceText(null, this.data));
