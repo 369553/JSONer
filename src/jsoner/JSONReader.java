@@ -12,7 +12,7 @@ import java.util.Map;
  * 
  * @author Mehmet Âkif SOLAK
  * JSON okuma işlemlerini yapmak için bir sınıf
- * @version 2.0.8
+ * @version 2.0.9
  */
 public class JSONReader{
     enum dType{
@@ -610,6 +610,7 @@ public class JSONReader{
                 nTAnyC = false;
             if(type == dType.NUM && !isValueTaked){
                 //Kabûl edilebilir iki seçenek : sayı veyâ nokta (nokta bir def'aya mahsus kabûl edilebilir):
+                // - ve + işâreti kabûl edilebilir
                 //Veyâ sonlanma...
                 if(isNumber(c)){
                     oValue.append(c);
@@ -622,12 +623,12 @@ public class JSONReader{
                 }
                 else if(c == ',' || c == '}'){
                     isValueTaked = true;
-//                    continue;
+//                    continue;// Kapalı olması devâm etmesini sağlıyor
                 }
                 else
                     break;//Sayıdan sonra nokta geldiyse ve sonrasında başka nokta geldiyse VEYÂ sayıdan sonra nokta geldiyse ve sonrasında sayı dışında ve sonlanma işâreti dışında bir şey geldiyse okumayı sonlandır
             }
-            if(isNumber(c) && !isValueTaked && !cBN){//Okunan karakter sayı ise
+            if((isNumber(c) || c == '-' || c == '+') && !isValueTaked && !cBN){//Okunan karakter sayı ise (sayının ilk karakteri buraya giriyor)
                 type = dType.NUM;
                 oValue.append(c);
                 continue;
