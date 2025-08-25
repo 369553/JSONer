@@ -1,7 +1,9 @@
 package jsoner;
 
+import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,7 +17,7 @@ import java.util.List;
 /**
  * Bir Java nesnesinin JSON metnini oluşturmak için kullanılan hizmet sınıfıdır
  * @author Mehmed Âkif SOLAK
- * @version 2.0.6
+ * @version 2.0.10
  */
 public class JSONWriter{
 
@@ -23,8 +25,8 @@ public class JSONWriter{
 
 //İŞLEM YÖNTEMLERİ:
     /**
-     * Verilen nesnenin karşılığı olan JSON metni üretilir, Allâh'ın izniyle..
-     * Bu JSON nesnesi kök nesne olacaksa 'key' parametresine {@code} null verin
+     * Verilen nesnenin karşılığı olan JSON metni üretilir<br>
+     * Bu JSON nesnesi kök nesne olacaksa 'key' parametresine {@code null} verin
      * @param key JSON nesnesi başka JSON nesnesinin özelliği ise ismini girin
      * @param obj JSON metnine çevrilmek istenen nesne
      * @param isFirst Nesnenin ilk elemanı yazdırılıyorsa {@code true} olmalı
@@ -32,15 +34,10 @@ public class JSONWriter{
      */
     public String produceText(String key, Object obj, boolean putNewLineForLook, boolean isFirst){
         // isFirst : Gönderilen değişken ilk eleman ise 'true' olmalı
-        boolean isNum = false;// Yazısı üretilmek istenen değişken bir sayı ise 'true' olmalıdır
         boolean isStr = false;// Değişken tipi yazı ise 'true' olmalı
-        boolean isBool = false;// Değişken tipi 'boolean' ise 'true' olmalı
         boolean isArr = false;// Değişken tipi dizi ise 'true' olmalı
         boolean isJSONArr = false;// Değişken tipi JSONArray ise 'true' olmalı
-        boolean isByte = false;// Değişken tipi byte ise 'true' olmalı
         boolean isPri = false;// Temel bir veri tipi ise 'true' olmalı
-        boolean isAllSame = false;// Eğer değişken bir dizi ise ve dizi içerisindeki tüm değerlerin tipi aynı ise 'true' olmalı
-        boolean isNull = false;// Gelen değişken 'null' ise 'true' olmalı
         StringBuilder sB = new StringBuilder();//stringBuilder, üretilen JSON verisini tutmak için
         int len = -1;// Dizi gönderildiğinde dizi uzunluğunu tutmak için
         Class dTyp;// dataType = veri tipi
@@ -55,7 +52,7 @@ public class JSONWriter{
                 sB.append(" ");
         }
         if(obj == null){
-            isNull = true;
+//            isNull = true;
             sB.append("null");
             return sB.toString();
         }
@@ -130,8 +127,10 @@ public class JSONWriter{
         }
         // Önce dizi olmayan verilerin JSON metnini üret;
         // Sonra dizi için özyinelemeli olacak şekilde algoritma tasarla
-        else if(dTyp == Integer.class || dTyp == Double.class || dTyp == Float.class || dTyp == Long.class || dTyp == Short.class || dTyp == BigInteger.class){
-            isNum = true;
+        else if(dTyp == Integer.class || dTyp == Double.class || 
+                dTyp == Float.class|| dTyp == Long.class || dTyp == Short.class
+                || dTyp == BigInteger.class || dTyp == BigDecimal.class){
+//            isNum = true;
             isPri = true;
         }
         else if(dTyp == String.class || dTyp == Character.class){
@@ -139,16 +138,21 @@ public class JSONWriter{
             isPri = true;
         }
         else if(dTyp == Boolean.class){
-            isBool = true;
+//            isBool = true;
             isPri = true;
         }
         else if(dTyp == Byte.class){
             // Burası ele alınmalı
-            isByte = true;
+//            isByte = true;
             isPri = true;
         }
-        else if(dTyp == Date.class || dTyp == LocalDateTime.class || dTyp == LocalDate.class || dTyp == LocalTime.class){
-            
+        else if(dTyp == Date.class || dTyp == LocalDateTime.class || dTyp == LocalDate.class || dTyp == LocalTime.class || dTyp == java.sql.Date.class){
+            return sB.append("\"").append(obj).append("\"").toString();
+            // Şu an ISO formatında alınıyor; SQL formatı da desteklenmeli
+            // Ayrıca, timezone eklenmesinin de desteklenmesi lazım
+        }
+        else if(dTyp == File.class){
+            return sB.append("\"").append(((File) obj).getAbsolutePath()).append("\"").toString();
         }
         if(isPri){// Değişken temel bir veri tipinde ise;
             if(isStr)
@@ -218,7 +222,7 @@ public class JSONWriter{
         }
     }
     /**
-     * Verilen nesnenin karşılığı olan JSON metni üretilir
+     * Verilen nesnenin karşılığı olan JSON metni üretilir<br>
      * Bu JSON nesnesi kök nesne olacaksa 'key' parametresine {@code} null verin
      * @param key JSON nesnesi başka JSON nesnesinin özelliği ise ismini girin
      * @param obj JSON metnine çevrilmek istenen nesne
@@ -228,7 +232,7 @@ public class JSONWriter{
         return produceText(key, obj, false, false);
     }
     /**
-     * Özellikleri {@code Map} ile tutulan JSON nesnesinin metni üretilir
+     * Özellikleri {@code Map} ile tutulan JSON nesnesinin metni üretilir<br>
      * Bu, kök nesne ise 'nameVariableOnTheMap' parametresine {@code} null verin
      * @param map Özellik haritası
      * @param nameOfVariableOnTheMap başka JSON nesnesinin özelliği ise ismi

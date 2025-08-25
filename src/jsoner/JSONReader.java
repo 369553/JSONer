@@ -12,7 +12,7 @@ import java.util.Map;
  * 
  * @author Mehmet Âkif SOLAK
  * JSON okuma işlemlerini yapmak için bir sınıf
- * @version 2.0.9
+ * @version 2.0.10
  */
 public class JSONReader{
     enum dType{
