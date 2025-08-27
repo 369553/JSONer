@@ -1,5 +1,6 @@
 package jsoner;
 
+import ReflectorRuntime.Reflector;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -14,6 +15,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
+import java.util.NoSuchElementException;
 /**
  * Bir Java nesnesinin JSON metnini oluşturmak için kullanılan hizmet sınıfıdır
  * @author Mehmed Âkif SOLAK
@@ -40,7 +42,7 @@ public class JSONWriter{
         boolean isPri = false;// Temel bir veri tipi ise 'true' olmalı
         StringBuilder sB = new StringBuilder();//stringBuilder, üretilen JSON verisini tutmak için
         int len = -1;// Dizi gönderildiğinde dizi uzunluğunu tutmak için
-        Class dTyp;// dataType = veri tipi
+        Class<?> dTyp;// dataType = veri tipi
         if(putNewLineForLook && isFirst)
             sB.append("\n");
         if(key != null){
@@ -60,6 +62,16 @@ public class JSONWriter{
         if(dTyp.isEnum()){
             obj = String.valueOf(obj);
             dTyp = String.class;
+        }
+        else if(dTyp.equals(Class.class)){
+            try{
+                obj = ((Class<?>) obj).getName();
+                dTyp = String.class;
+            }
+            catch(ClassCastException exc){// Buna gerek yok gibi, <?> işi bozmuyorsa...
+                sB.append("null");
+                return sB.toString();
+            }
         }
         if((obj instanceof Collection) && !(obj instanceof Map) && !(obj instanceof List)){// List ve Map dışındaki koleksiyonları ele almak için
             List<Object> asList = new ArrayList<Object>();
@@ -168,23 +180,29 @@ public class JSONWriter{
             sB.append("{");
             // Değerler alınmalı:
             {// Burası ayrı bir fonksiyonda yazılabilir, üzerinde düşün!
-                Field[] fS = obj.getClass().getDeclaredFields();// fields, alanlar
+                List<Field> fS = Reflector.getService().getFields(obj.getClass(), true);
                 boolean isFirstObj = true;
                 boolean lastFieldIsUnavailable = false;// Kendinden bir önceki alana erişilebilip, erişilemediğini öğrenmek için bir değişken; 4. sorunun çözümü için...
                 boolean isFirstFieldCanAccess = false;// Erişilebilir ilk alanın sıra numarası sıfırdan farklı olduğu durumda, açılış parantezinden sonra virgül konması sorununu () çözmek için...
                 int sayac = 0;
                 for(Field val : fS){
                     try{
-                        Object valOfField = val.get(obj);
+                        List<String> fieldNames = new ArrayList<String>();
+                        fieldNames.add(val.getName());
+                        Map<String, Object> valOfField = Reflector.getService().getValueOfFields(obj, fieldNames, Reflector.CODING_STYLE.CAMEL_CASE, true, true);
+                        if(valOfField == null)
+                            throw new NullPointerException();
+                        if(valOfField.isEmpty())
+                            throw new NullPointerException();
                         if(lastFieldIsUnavailable && isFirstFieldCanAccess)
                             sB.append(",");
-                        if(lastFieldIsUnavailable && sayac == fS.length - 1 && putNewLineForLook)
+                        if(lastFieldIsUnavailable && sayac == fS.size() - 1 && putNewLineForLook)
                             sB.append("\n");
-                        sB.append(produceText(val.getName(), valOfField, putNewLineForLook, isFirstObj));
+                        sB.append(produceText(val.getName(), valOfField.values().iterator().next(), putNewLineForLook, isFirstObj));
                         lastFieldIsUnavailable = false;
                         isFirstFieldCanAccess = true;
                     }
-                    catch(IllegalArgumentException | IllegalAccessException exc){
+                    catch(NullPointerException | NoSuchElementException exc){
                         // Hatâ olduğunu belirtmek için bir kayıt defterine not düşülebilir
                         if(sayac > 0){// Döngünün ilk adımı değilse
                             int currLen = sB.length();
@@ -203,7 +221,7 @@ public class JSONWriter{
                     }
                     if(sayac == 0)
                         isFirstObj = false;
-                    if(sayac < fS.length - 1){
+                    if(sayac < fS.size() - 1){
                         sB.append(",");
                         if(putNewLineForLook){
                             if(isBasicDataType(val))
