@@ -16,14 +16,26 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 /**
  * Bir Java nesnesinin JSON metnini oluşturmak için kullanılan hizmet sınıfıdır
  * @author Mehmed Âkif SOLAK
- * @version 2.0.10
+ * @version 2.0.12
  */
 public class JSONWriter{
+    private CODING_STYLE codingStyle;
 
-    public JSONWriter(){}
+    /**
+     * Nesnelerin alan değerlerinin alınması için kodlama tipi belirtilebilir<br>
+     * Varsayılan kodlama biçimi {@code CODING_STYLE.CAMEL_CASE} değeridir
+     * @param codingStyle Kodlama biçimi
+     */
+    public JSONWriter(CODING_STYLE codingStyle){
+        this.codingStyle = codingStyle;
+    }
+    public JSONWriter(){
+        this(CODING_STYLE.CAMEL_CASE);
+    }
 
 //İŞLEM YÖNTEMLERİ:
     /**
@@ -46,7 +58,7 @@ public class JSONWriter{
         if(putNewLineForLook && isFirst)
             sB.append("\n");
         if(key != null){
-            sB.append("\"").append(key).append("\"");
+            sB.append("\"").append(replaceSpecialCharacters(addEscapeCharacters(key))).append("\"");
             if(putNewLineForLook)
                 sB.append(" ");
             sB.append(":");
@@ -73,13 +85,17 @@ public class JSONWriter{
                 return sB.toString();
             }
         }
+        else if(dTyp.equals(UUID.class)){
+            obj = obj.toString();
+            dTyp = String.class;
+        }
         if((obj instanceof Collection) && !(obj instanceof Map) && !(obj instanceof List)){// List ve Map dışındaki koleksiyonları ele almak için
             List<Object> asList = new ArrayList<Object>();
             asList.addAll((Collection) obj);
             return produceText(key, asList, putNewLineForLook, isFirst);
         }
         if(obj instanceof JSONObject)
-            return produceJSONTextFromMap(((JSONObject) obj).getData(), putNewLineForLook, key);
+            return produceJSONTextFromMap(((JSONObject) obj).getData(), putNewLineForLook, replaceSpecialCharacters(getAppropriateStringValue(key)));// ]$
         if(dTyp.isArray() || obj instanceof List || obj instanceof JSONArray){
             if(dTyp.isArray())
                 isArr = true;
@@ -164,18 +180,19 @@ public class JSONWriter{
             // Ayrıca, timezone eklenmesinin de desteklenmesi lazım
         }
         else if(dTyp == File.class){
-            return sB.append("\"").append(((File) obj).getAbsolutePath()).append("\"").toString();
+            String prepared = addEscapeCharacters(((File) obj).getAbsolutePath());
+            return sB.append("\"").append(prepared).append("\"").toString();
         }
         if(isPri){// Değişken temel bir veri tipinde ise;
             if(isStr)
                 sB.append("\"");
-            sB.append(obj);
+            sB.append(replaceSpecialCharacters(addEscapeCharacters(String.valueOf(obj))));
             if(isStr)
                 sB.append("\"");
             return sB.toString();
         }
         else if(obj instanceof Map)
-            return produceJSONTextFromMap((Map)obj, putNewLineForLook, key);
+            return produceJSONTextFromMap((Map)obj, putNewLineForLook, replaceSpecialCharacters(getAppropriateStringValue(key)));// ]$
         else{// Değişken bir nesne ise;
             sB.append("{");
             // Değerler alınmalı:
@@ -189,7 +206,7 @@ public class JSONWriter{
                     try{
                         List<String> fieldNames = new ArrayList<String>();
                         fieldNames.add(val.getName());
-                        Map<String, Object> valOfField = Reflector.getService().getValueOfFields(obj, fieldNames, Reflector.CODING_STYLE.CAMEL_CASE, true, true);
+                        Map<String, Object> valOfField = Reflector.getService().getValueOfFields(obj, fieldNames, Other.getCodingStyleForReflector(codingStyle), true, true);
                         if(valOfField == null)
                             throw new NullPointerException();
                         if(valOfField.isEmpty())
@@ -260,7 +277,7 @@ public class JSONWriter{
         int sayac = -1;
         boolean isFirst = true;
         StringBuilder buiText = new StringBuilder();
-        if(nameOfVariableOnTheMap != null)
+        if(nameOfVariableOnTheMap != null)// class ve file için ayrı ele al:
             buiText.append("\"").append(nameOfVariableOnTheMap).append("\"").append(":");
         if(putNewLineForSeeming)
             buiText.append("\n");
@@ -268,7 +285,7 @@ public class JSONWriter{
         boolean deleteLastCharacter = false;
         for(Object key : map.keySet()){
             deleteLastCharacter = true;
-            String keyAsStr = String.valueOf(key);
+            String keyAsStr = replaceSpecialCharacters(getAppropriateStringValue(key));//]$
             String value = "";
             sayac++;
             if(sayac == 1)
@@ -303,6 +320,53 @@ public class JSONWriter{
         buiText.append("}");
         return buiText.toString();
     }
+    /**
+     * Gelen değerin sınıfına bakarak uygun metni döndürür<br>
+     * Bu metodun yazılma sebebiyle {@code String.valueOf()} fonksiyonunun
+     * her zamân istenilen sonucu vermemesidir
+     * @return O nesneyi temsil eden metîn
+     */
+    private String getAppropriateStringValue(Object value){
+        if(value == null)
+            return null;
+        Class<?> cls = value.getClass();
+        String result = String.valueOf(value);
+        if(cls.equals(Class.class))
+            result = ((Class<?>) value).getName();
+        else if(cls.equals(File.class))
+            result = ((File) value).getAbsolutePath();
+        else if(cls.equals(String.class))
+            result = replaceSpecialCharacters((String) value);
+        return result;
+    }
+    public String addEscapeCharacters(String text){
+        StringBuilder sB = new StringBuilder();
+        for(char c : text.toCharArray()){
+            if(c == '\\')
+                sB.append("\\");
+            else if(c == '"')
+                sB.append("\\");
+            sB.append(c);
+        }
+        return sB.toString();
+    }
+    public String replaceSpecialCharacters(String text){
+        if(text == null)
+            return null;
+        StringBuilder sB = new StringBuilder();
+        for(char c : text.toCharArray()){
+        boolean pass = false;
+            switch(c){
+                case '\n' : {sB.append("\\").append("n"); pass = true; break;}
+                case '\t' : {sB.append("\\").append("t"); pass = true; break;}
+                case '\r' : {sB.append("\\").append("r"); pass = true; break;}
+                case '\b' : {sB.append("\\").append("n"); pass = true; break;}
+            }
+            if(!pass)
+                sB.append(c);
+        }
+        return sB.toString();
+    }
     //ARKAPLAN İŞLEM YÖNTEMLERİ:
     private static boolean isBasicDataType(Object val){
         Class dTyp = val.getClass();
@@ -312,4 +376,13 @@ public class JSONWriter{
             return true;
         return false;
     }
+
+// ERİŞİM METOTLARI:
+    public void setCodingStyle(CODING_STYLE codingStyle){
+        this.codingStyle = codingStyle;
+    }
+    public CODING_STYLE getCodingStyle(){
+        return codingStyle;
+    }
+    
 }

@@ -119,7 +119,7 @@ public class JSONArray implements Iterable<Object>, Cloneable{
      * @param codeStyle Hedef sınıftaki "setter" yöntemi isminin kod biçimi
      * @return Hedef sınıfın yeni bir örneği veyâ {@code null}
      */
-    public <T> T getElementAsTargetType(Class<T> targetClass, int index, Reflector.CODING_STYLE codeStyle){
+    public <T> T getElementAsTargetType(Class<T> targetClass, int index, CODING_STYLE codeStyle){
         if(targetClass == null)
             return null;
         if(index < 0 || index >= data.size())

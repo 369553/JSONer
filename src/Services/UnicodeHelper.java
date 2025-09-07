@@ -51,4 +51,7 @@ public class UnicodeHelper{
         }
         return value;
     }
+    public static String getUnicodeFromCharacter(char character){
+        return getUnicodeFromCharacter(String.valueOf(character));
+    }
 }

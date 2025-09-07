@@ -124,12 +124,12 @@ public class JSONObject implements Cloneable, Iterable<Map<String, Object>>{
      * @param codeStyle Hedef sınıftaki "setter" yöntemi isminin kod biçimi
      * @return Hedef sınıfın yeni bir örneği veyâ {@code null}
      */
-    public <T> T getThisObjectAsTargetType(Class<T> targetClass, Reflector.CODING_STYLE codeStyle){
+    public <T> T getThisObjectAsTargetType(Class<T> targetClass, CODING_STYLE codeStyle){
         if(targetClass == null)
             return null;
         if(this.data == null)
             return null;
-        return Reflector.getService().produceInjectedObject(targetClass, data, codeStyle);
+        return Reflector.getService().produceInjectedObject(targetClass, data, Other.getCodingStyleForReflector(codeStyle));
     }
     /**
      * Verilen anahtarın işâret ettiği veri kaldırılır

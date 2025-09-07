@@ -12,7 +12,7 @@ import java.util.Map;
  * 
  * @author Mehmet Âkif SOLAK
  * JSON okuma işlemlerini yapmak için bir sınıf
- * @version 2.0.10
+ * @version 2.0.12
  */
 public class JSONReader{
     enum dType{
@@ -531,7 +531,7 @@ public class JSONReader{
                         if(spec != 'u' && spec != 'b' && spec != 'f'){// Bunlar gönderilen fonksiyonda tamâmen ele alınmış özel karakterler
                             value.append(String.valueOf(result.get("value")));
                         }
-                        else{// Diğer durumlar : u, b, f
+                        else{// Diğer durumlar : u, b, f, r
                             switch(spec){
                                 case 'u' :{
                                     if(tx.length > sayac + 4){// Hatâ oluşmaması için;
@@ -553,6 +553,10 @@ public class JSONReader{
                                     break;
                                 }
                                 case 'f' :{
+                                    //.;.
+                                    break;
+                                }
+                                case 'r' :{
                                     //.;.
                                     break;
                                 }
@@ -815,17 +819,17 @@ public class JSONReader{
                 isEsc = true;
                 break;
             }
-            case '\\' :{
+            case '\\' :{// Ters ayraç karakteri
                 value = String.valueOf(c);
                 isEsc = true;
                 break;
             }
-            case '/' :{
+            case '/' :{// Ayraç karakteri
                 value = String.valueOf(c);
                 isEsc = true;
                 break;
             }
-            case 'b' :{
+            case 'b' :{// Bir önceki karakteri silme karakteri
                 isEsc = true;
                 cycle = 0;
                 //.;.
@@ -837,22 +841,21 @@ public class JSONReader{
                 //.;.
                 break;
             }
-            case 'n' :{
+            case 'n' :{// Yeni satır karakteri
                 value = "\n";
                 isEsc = true;
                 break;
             }
-            case 'r' :{
-                value = "\n";
+            case 'r' :{// Satır başına dön karakteri
                 isEsc = true;
                 break;
             }
-            case 't' :{
+            case 't' :{// 4 karakterlik boşluk anlamına gelen TAB düğmesinin uyguladığı boşluk karakteri
                 value = "\t";
                 isEsc = true;
                 break;
             }
-            case 'u' :{
+            case 'u' :{// Kendisinden sonra gelen 4 karakterle berâber unicode koduyla karakteri simgeleyen unicode karakteri
 //                Burada 'value' atanmıyor; dönülen yerde bunun çalıştırılması lazım : getUnicodeCharacter();
                 isEsc = true;
                 cycle = 5;
