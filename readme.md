@@ -1,8 +1,30 @@
-# JSONer Kullanım Kılavuzu (v2.0.1)
+# JSONer Kullanım Kılavuzu (v2.0.12)
+
+## GENEŞ BİLGİLER
+
+- JSONer, JSON oluşturma, ayrıştırma ve nesneye çevrim için Java ile sıfırdan yazılmış bir yardımcı kitâplıktır.
+
+- Bu kitâplığı kullanarak;
+  
+  - JSON metînlerini ayrıştırarak Java nesnelerine çevirebilirsiniz
+  
+  - Java nesnelerini (kullanıcı tanımlı sınıflar dâhil) JSON tipine çevirebilirsiniz
+  
+  - Java değişkenlerine çevrilmiş JSON verilerinizi tek bir metot kullanarak hedef kullanıcı tanımlı sınıfın nesnesine zerk edebilirsiniz
+  
+  - `JSONObject` ve `JSONArray` sınıflarıyla JSON verileri üzerinde kolayca oynayabilirsiniz.
+
+- Kitâplık hakkında görüşlerinizi bildirmek isterseniz `mehmedakifs@yaani.com` adresi üzerinden iletişime geçebilirsiniz.
+
+- Yazar : Mehmet Akif SOLAK
+
+## İNDİRME
+
+- Bu kitâplığı doğrudan kullanmak için `/dist` dizini altındaki `jsoner.jar` dosyasını `lib` diziniyle berâber projenize kopyalayıp, `jsoner.jar` dosyasını projeye ekleyebilirsiniz.
 
 ## ERİŞİM
 
-- JSON metînlerinden nesnelerin - dizilerin inşâ edilmesini sağlayan `JSONReader` sınıfının örneğine `JSONReader.getService()` statik yöntemi üzerinden erişebilirsiniz.
+- JSON metînlerinden nesnelerin - dizilerin inşâ edilmesini sağlayan `JSONReader` sınıfının örneğine `JSONReader.getService()` statik yöntemi üzerinden veyâ yen, bir `JSONReader` nesnesi oluşturarak erişebilirsiniz.
 
 - Java nesnelerinden - dizilerinden JSON metni üretilmesini sağlayan JSONWriter sınıfının örneğini `new JSONWriter()` kodu ile oluşturabilir, bunu kullanabilirsiniz.
 
@@ -127,7 +149,7 @@
 - Veriyi `JSONArray` içerisinden ilgili veri tipinde almak için `getString(int index)`, `getDouble(int index)` gibi yöntemleri kullanabilirsiniz.
 
 - Eğer bir elemanı bir başka sınıf tipinde bir nesne olarak almak istiyorsanız
-  `getElementAsTargetType(Class<T> targetClass, int index, Reflector.CODING_STYLE codeStyle)` yöntemini kullanabilirsiniz.
+  `getElementAsTargetType(Class<T> targetClass, int index, jsoner.CODING_STYLE codeStyle)` yöntemini kullanabilirsiniz.
 
 - JSON verisi içerisindeki diziyi `JSONObject` veyâ `JSONArray` olarak da alabilirsiniz:
   
@@ -175,7 +197,7 @@
 
 ## JSONer'ı Kullanışlı Bir Araç Olarak Düşünün
 
-- JSONer kitâplığının en önemli özelliğinden birisi elde edilen JSON verilerini bir sınıfın nesnesini inşâ etmek için kullanabiliyor olmanızdır. Eğer bir veri içerdiği özellik isimleri bakımından bir Java sınıfıyla aynı ise veyâ aynı isimde özellikleri varsa, bu veriyi bu Java sınıfının bir örneğinin üretmek için kullanabilirsiniz. `getThisObjectAsTargetType(Class<T> targetClass, Reflector.CODING_STYLE codeStyle)` özelliğini kullanın.
+- JSONer kitâplığının en önemli özelliğinden birisi elde edilen JSON verilerini bir sınıfın nesnesini inşâ etmek için kullanabiliyor olmanızdır. Eğer bir veri içerdiği özellik isimleri bakımından bir Java sınıfıyla aynı ise veyâ aynı isimde özellikleri varsa, bu veriyi bu Java sınıfının bir örneğinin üretmek için kullanabilirsiniz. `getThisObjectAsTargetType(Class<T> targetClass, jsoner.CODING_STYLE codeStyle)` özelliğini kullanın.
 
 - Misal, şu kodların tanımladığı bir Java sınıfımız olsun:
   
@@ -197,18 +219,18 @@
   
   ```java
   User injectedUser = jobjUser.getThisObjectAsTargetType(User.class,
-                          Reflector.CODING_STYLE.CAMEL_CASE);
+                          jsoner.CODING_STYLE.CAMEL_CASE);
   ```
 
-- Yukarıdaki kodda ilgili fonksiyonun ilk parametresi bir örneğini istediğimiz sınıfın kendisi olmalıdır. İkinci parametre ise ilgili sınıfın özelliklerinin `private` erişim belirteciyle sınırlandırılmış olması durumunda ilgili özelliklere verileri zerk edebilmek için gerekli "setter" yöntemlerinin hangi kodlama biçimine göre aranacağını bildiren bir enum bilgisidir. Bu özellik yazdığım kullanışlı `Reflector` kitâplığının bir özelliğidir; bu sebeple bu sınıf içerisindeki `enum` tip olan `CODING_STYLE` tipinde bir değer belirtilmesi gerekiyor.
+- Yukarıdaki kodda ilgili fonksiyonun ilk parametresi bir örneğini istediğimiz sınıfın kendisi olmalıdır. İkinci parametre ise ilgili sınıfın özelliklerinin `private` erişim belirteciyle sınırlandırılmış olması durumunda ilgili özelliklere verileri zerk edebilmek için gerekli "setter" yöntemlerinin hangi kodlama biçimine göre aranacağını bildiren bir enum bilgisidir. Bu özellik `ReflectorRuntime` kitâplığının bir özelliğidir; kullanıcının bu özelliği kullanırken bu kütüphânenin `enum` değerine bağımlı olmaması için `jsoner.CODING_STYLE` şeklinde bir enum oluşturulmuştur.s
 
 - Bir örnek üzerinden gidecek olursak, User sınıfının `name` özelliği erişilemez durumda ise ilgili özelliğe verinin zerk edilmesi için "setter" yöntemi kullanılır. `CODING_STYLE` `CAMEL_CASE` seçilmişse `setName`  isminde, `SNAKE_CASE` seçilmişse `set_name` isminde bir setter yöntemi aranır; eğer bulunur ve başarılı bir şekilde çalıştırılırsa veri, hedef özelliğe zerk edilmiş (aktarılmış, enjekte edilmiş) olur. 
 
-> ***NOT :*** JSONer dayanıklı bir kütüphâne olan `Reflector`'ı kullanmaktadır. Eğer verilerinizin bir kısmı hedef sınıfın özelliklerine aktarılamazsa, hatâ alınmaz. Ayrıca hedef veriniz ile mevcut verinizin tipi Java `auto-wrapping` sebebiyle farklı ise, hedef veri tipine dönüşüm gerçekleştirilir;
+> ***NOT :*** JSONer dayanıklı bir kütüphâne olan `ReflectorRuntime.Reflector`'ı kullanmaktadır. Eğer verilerinizin bir kısmı hedef sınıfın özelliklerine aktarılamazsa, hatâ alınmaz. Ayrıca hedef veriniz ile mevcut verinizin tipi Java `auto-wrapping` sebebiyle farklı ise, hedef veri tipine dönüşüm gerçekleştirilir;
 > 
-> Java'da `Integer[].class` tipi otomatik olarak `int[].class` tipine dönüştürülemez; fakat JSONer'ın kullandığı `Reflector` kitâplığı bu dönüşümü desteklemektedir.
+> Java'da `Integer[].class` tipi otomatik olarak `int[].class` tipine dönüştürülemez; fakat JSONer'ın kullandığı `ReflectorRuntime` kitâplığı bu dönüşümü desteklemektedir.
 > 
-> Ayrıca `Reflector`'da`enum` tipindeki verilerinizin JSON metninde metîn tipinde saklanmasından ötürü `enum` tipindeki özelliklere ilgili verilerin aktarılamaması sorunu için de çözüm sağlanır. `enum` tipindeki özelliklere veri aktarmak için hem `enum` tipindeki değişkenlerinizi, hem de `enum` elemanı ile aynı karakterdeki metni kullanabilirsiniz.
+> Ayrıca `ReflectorRuntime`'da`enum` tipindeki verilerinizin JSON metninde metîn tipinde saklanmasından ötürü `enum` tipindeki özelliklere ilgili verilerin aktarılamaması sorunu için de çözüm sağlanır. `enum` tipindeki özelliklere veri aktarmak için hem `enum` tipindeki değişkenlerinizi, hem de `enum` elemanı ile aynı karakterdeki metni kullanabilirsiniz.
 > 
 > `User.GENDER.MALE` tipini seçmek için hem `User.GENDER.MALE` değişkenini, hem de `"MALE"` String değişkenini kullanabilirsiniz.
 
